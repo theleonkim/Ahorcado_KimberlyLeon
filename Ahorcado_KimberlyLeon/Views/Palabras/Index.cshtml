@@ -1,0 +1,47 @@
+﻿@model IEnumerable<Ahorcado_KimberlyLeon.Models.Palabra>
+
+@{
+    ViewBag.Title = "Diccionario";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Diccionario</h2>
+
+<p>
+    @Html.ActionLink(
+        linkText: "Agregar palabra",
+        actionName: "Crear",
+        controllerName: "Palabras",
+        routeValues: null,
+        htmlAttributes: new { @class = "btn btn-primary" }  /* usa tu clase 'btn-cloud' si quieres */
+    )
+</p>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-info">No hay palabras registradas.</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Texto</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                var i = 1;
+                foreach (var p in Model)
+                {
+                    <tr>
+                        <td>@i</td>
+                        <td>@p.Texto</td>
+                    </tr>
+                    i++;
+                }
+            }
+        </tbody>
+    </table>
+}

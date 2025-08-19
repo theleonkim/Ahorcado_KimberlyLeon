@@ -1,0 +1,37 @@
+﻿@{
+    // Elimina o comenta la línea 'Layout = null;'
+    ViewBag.Title = ViewBag.Title ?? "Ahorcado";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body>
+    <header class="navbar navbar-expand navbar-light bg-light px-3">
+        <a class="navbar-brand" href="@Url.Action("Index","Home")">Ahorcado | Kimberly León</a>
+        <nav class="ms-3">
+            <a class="nav-link d-inline" href="@Url.Action("Index","Home")">Inicio</a>
+            <a class="nav-link d-inline" href="@Url.Action("Index","Palabras")">Diccionario</a>
+        </nav>
+    </header>
+
+    <main class="container my-4">
+        @RenderBody()
+    </main>
+
+    <footer class="container d-flex justify-content-between small text-muted py-3 border-top">
+        <span>© @DateTime.Now.Year · </span>
+        <span></span>
+    </footer>
+
+    @Scripts.Render("~/bundles/jquery")
+    
+    @RenderSection("scripts", required: false)
+</body>
+</html>

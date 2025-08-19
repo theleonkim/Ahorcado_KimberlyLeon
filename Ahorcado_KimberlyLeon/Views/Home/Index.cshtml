@@ -1,0 +1,16 @@
+﻿@{
+    ViewBag.Title = "Inicio";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="text-center mt-4">
+    <img src="https://i.imgur.com/KhHZrr3.png" alt="Ahorcado" style="width:120px;filter:drop-shadow(0 4px 6px rgba(0,0,0,.2));" />
+    <h1 class="display-5 fw-bold mt-3">Juego del Ahorcado</h1>
+    <p class="mt-2">Selecciona una opción:</p>
+
+    <div class="d-flex justify-content-center flex-wrap gap-3 mt-4">
+        <a href="@Url.Action("Crear","Palabras")" class="btn-cloud">Agregar palabra</a>
+        <a href="@Url.Action("Crear","Jugadores")" class="btn-cloud">Crear jugador</a>
+        <a href="@Url.Action("Crear","Partidas")" class="btn-cloud">Nueva partida</a>
+        <a href="@Url.Action("Escalafon","Jugadores")" class="btn-cloud">Escalafón</a>
+    </div>
+</div>

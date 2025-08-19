@@ -1,0 +1,31 @@
+﻿@model dynamic
+
+@{
+    ViewBag.Title = "Juego del Ahorcado";
+}
+
+<h2>Juego del Ahorcado</h2>
+
+<div class="text-center">
+    <h3>Palabra: @ViewBag.PalabraOculta</h3>
+    <h4>Intentos restantes: @ViewBag.IntentosRestantes</h4>
+
+    @if (ViewBag.Mensaje != null)
+    {
+        <div class="alert alert-info">@ViewBag.Mensaje</div>
+    }
+
+    @if (ViewBag.JuegoTerminado == null || !ViewBag.JuegoTerminado)
+    {
+        <div class="btn-group-sm">
+            @for (char c = 'A'; c <= 'Z'; c++)
+            {
+                <a href="@Url.Action("AdivinarLetra", new { letra = c })" class="btn btn-outline-primary" style="margin: 2px;">@c</a>
+            }
+        </div>
+    }
+    else
+    {
+        @Html.ActionLink("Volver al Inicio", "Index", "Home", null, new { @class = "btn btn-success" })
+    }
+</div>

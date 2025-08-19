@@ -1,0 +1,21 @@
+﻿@model Ahorcado_KimberlyLeon.Models.Palabra
+@{
+    ViewBag.Title = "Agregar palabra";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Agregar palabra</h2>
+
+@using (Html.BeginForm("Crear", "Palabras", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Texto)
+        @Html.TextBoxFor(m => m.Texto, new { @class = "form-control", autofocus = "autofocus" })
+        @Html.ValidationMessageFor(m => m.Texto, "", new { @class = "text-danger" })
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    @Html.ActionLink("Volver al diccionario", "Index", "Palabras", null, new { @class = "btn btn-default" })
+}

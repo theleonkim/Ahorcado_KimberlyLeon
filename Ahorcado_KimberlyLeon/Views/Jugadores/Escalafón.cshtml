@@ -1,0 +1,40 @@
+﻿@model IEnumerable<Ahorcado_KimberlyLeon.Models.Jugador>
+
+@{
+    ViewBag.Title = "Escalafón de Jugadores";
+}
+
+<h2>@ViewBag.Title</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Id)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Nombre)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Marcador)
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nombre)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Marcador)
+            </td>
+            <td>
+                @Html.ActionLink("Detalles", "Details", new { id = item.Id })
+            </td>
+        </tr>
+    }
+</table>
