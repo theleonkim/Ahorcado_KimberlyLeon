@@ -145,12 +145,14 @@ namespace Ahorcado_KimberlyLeon.Controllers
             // ¿terminó?
             if ((Session["PalabraOculta"] as string) == palabraSecreta)
             {
-                Session["Mensaje"] = "¡Felicidades, ganaste!";
+                // Al ganar, también mostramos la palabra
+                Session["Mensaje"] = $"¡Felicidades, ganaste! La palabra era: {palabraSecreta.ToUpper()}";
                 await FinalizarPartida(true);
             }
             else if (intentosRestantes <= 0)
             {
-                Session["Mensaje"] = "¡Lo siento, perdiste!";
+                // Al perder, mostramos cuál era la palabra
+                Session["Mensaje"] = $"¡Lo siento, perdiste! La palabra era: {palabraSecreta.ToUpper()}";
                 await FinalizarPartida(false);
             }
 

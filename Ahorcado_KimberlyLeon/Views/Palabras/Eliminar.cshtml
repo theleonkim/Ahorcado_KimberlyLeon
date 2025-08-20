@@ -1,0 +1,19 @@
+﻿@model Ahorcado_KimberlyLeon.Models.Palabra
+@{
+    ViewBag.Title = "Eliminar palabra";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Eliminar palabra</h2>
+
+<div class="alert alert-warning">
+    ¿Seguro que deseas eliminar <strong>@Model.Texto</strong>?
+</div>
+
+@using (Html.BeginForm("Eliminar", "Palabras", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    <button type="submit" class="btn btn-danger">Eliminar</button>
+    @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-default" })
+}

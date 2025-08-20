@@ -1,0 +1,28 @@
+﻿@model Ahorcado_KimberlyLeon.Models.Palabra
+@{
+    ViewBag.Title = "Editar palabra";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Editar palabra</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    <div class="form-group">
+        @Html.LabelFor(m => m.Texto)
+        @Html.TextBoxFor(m => m.Texto, new
+        {
+            @class = "form-control",
+            maxlength = "60",
+            pattern = "[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+",
+            title = "Solo letras (sin números ni espacios)"
+        })
+        @Html.ValidationMessageFor(m => m.Texto)
+    </div>
+    @Html.HiddenFor(m => m.Usada)
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    @Html.ActionLink("Volver", "Index", null, new { @class = "btn btn-link" })
+}
+@section Scripts { @Scripts.Render("~/bundles/jqueryval") }
