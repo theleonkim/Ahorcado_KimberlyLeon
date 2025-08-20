@@ -71,6 +71,14 @@
             Salir / Rendirse ( -@ViewBag.Penalizacion )
         </button>
     }
+    @using (Html.BeginForm("NuevoIntento", "Partidas", FormMethod.Post, new { @class = "d-inline" }))
+    {
+        @Html.AntiForgeryToken()
+        <button type="submit"
+                class="btn btn-primary ms-2">
+            Nuevo intento
+        </button>
+    }
 
     @* Form oculto para derrota por tiempo *@
     @using (Html.BeginForm("TiempoAgotado", "Partidas", FormMethod.Post, new { id = "formTiempoAgotado" }))

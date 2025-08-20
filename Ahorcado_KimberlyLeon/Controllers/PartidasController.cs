@@ -220,6 +220,72 @@ namespace Ahorcado_KimberlyLeon.Controllers
             await FinalizarPartida(false);
             return RedirectToAction("Jugar");
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> NuevoIntento()
+        {
+            // Si no hay partida en curso, vuelve a Crear
+            if (!(Session["PartidaId"] is int pidActual))
+                return RedirectToAction("Crear");
+
+            // Cargar la partida actual
+            var partidaActual = await db.Partidas.FindAsync(pidActual);
+            if (partidaActual == null)
+                return RedirectToAction("Crear");
+
+            // Si NO está marcada como terminada en sesión y no tiene FechaFin, la damos por perdida
+            bool sesionTerminada = (Session["JuegoTerminado"] is bool jt) && jt;
+            bool tieneFechaFin = partidaActual.GetType().GetProperty("FechaFin")?.GetValue(partidaActual) != null;
+
+            if (!sesionTerminada && !tieneFechaFin)
+            {
+                // cuenta como derrota según la dificultad
+                Session["Mensaje"] = "Partida interrumpida. Se registró como pérdida.";
+                await FinalizarPartida(false);
+                // recargar la entidad por si cambió en FinalizarPartida
+                partidaActual = await db.Partidas.FindAsync(pidActual);
+            }
+
+            // Mismo jugador y misma dificultad
+            int jugadorId = partidaActual.JugadorId;
+            var dificultad = partidaActual.Dificultad;
+
+            // Buscar una nueva palabra (no usada)
+            var palabra = await db.Palabras
+                                  .Where(p => !p.Usada)
+                                  .OrderBy(p => Guid.NewGuid())
+                                  .FirstOrDefaultAsync();
+            if (palabra == null)
+            {
+                TempData["MensajeError"] = "No hay más palabras disponibles para un nuevo intento.";
+                return RedirectToAction("Jugar");
+            }
+
+            // Crear la nueva partida
+            var nueva = new Partida
+            {
+                JugadorId = jugadorId,
+                PalabraId = palabra.Id,
+                Dificultad = dificultad,
+                FechaInicio = DateTime.UtcNow
+            };
+
+            db.Partidas.Add(nueva);
+            palabra.Usada = true;
+            await db.SaveChangesAsync();
+
+            // Resetear estado de juego en sesión
+            Session["PartidaId"] = nueva.Id;
+            Session["PalabraSecreta"] = palabra.Texto;
+            Session["PalabraOculta"] = InicializarOculta(palabra.Texto);
+            Session["IntentosRestantes"] = 5;       // si quieres, ajusta por dificultad
+            Session["LetrasAdivinadas"] = new List<char>();
+            Session["JuegoTerminado"] = false;
+            // Mantén el mensaje que dejamos arriba o límpialo:
+            // Session["Mensaje"] = null;
+
+            return RedirectToAction("Jugar");
+        }
 
         // POST: Partidas/TiempoAgotado → derrota por tiempo
         [HttpPost]
