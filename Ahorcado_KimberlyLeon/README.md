@@ -79,25 +79,27 @@ erDiagram
 
 ```mermaid
 flowchart TD
-    A[Inicio] --> B[Crear Jugador (si no existe)]
-    B --> C[Crear Partida: Seleccionar Jugador + Dificultad]
-    C --> D[Asignar Palabra no usada y marcarla Usada]
-    D --> E[Jugar: Adivinar letra]
-    E -->|Letra acierta| F[Revelar posiciones]
-    E -->|Letra falla| G[Restar intento y registrar fallo]
+    A["Inicio"] --> B["Crear jugador (si no existe)"]
+    B --> C["Crear partida: seleccionar jugador + dificultad"]
+    C --> D["Asignar palabra no usada y marcarla 'Usada'"]
+    D --> E["Jugar: adivinar letra"]
+    E -->|Acierta| F["Revelar posiciones"]
+    E -->|Falla| G["Restar intento y registrar fallo"]
 
-    F --> H{¿Palabra completa?}
-    G --> I{¿Quedan intentos?}
+    F --> H{"¿Palabra completa?"}
+    G --> I{"¿Quedan intentos?"}
 
-    H -->|Sí| J[Ganó: actualizar estadísticas y cerrar partida]
+    H -->|Sí| J["Ganó: actualizar estadísticas y cerrar partida"]
     H -->|No| E
     I -->|Sí| E
-    I -->|No| K[Perdió: actualizar estadísticas y cerrar partida]
+    I -->|No| K["Perdió: actualizar estadísticas y cerrar partida"]
 
-    J --> L[Escalafón]
-    K --> L[Escalafón]
-    L --> M[Fin]
-```
+    J --> L["Escalafón"]
+    K --> L
+    L --> M["Fin"]
+
+
+
 
 ## 🔗 Referencias
 
