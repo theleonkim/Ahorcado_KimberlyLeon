@@ -81,7 +81,7 @@ erDiagram
 flowchart TD
     A["Inicio"]
     B["Crear jugador<br/>(si no existe)"]
-    C["Crear partida:<br/>seleccionar jugador + dificultad"]
+    C["Crear partida:<br/>seleccionar jugador<br/ + dificultad"]
     D["Asignar palabra no usada<br/>y marcarla 'Usada'"]
     E["Jugar: adivinar letra"]
     F["Revelar posiciones"]
