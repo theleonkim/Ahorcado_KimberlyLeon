@@ -128,6 +128,10 @@
     <Compile Include="Migrations\202508191644039_InitialCreate.Designer.cs">
       <DependentUpon>202508191644039_InitialCreate.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202508202108243_PalabraValidacion.cs" />
+    <Compile Include="Migrations\202508202108243_PalabraValidacion.Designer.cs">
+      <DependentUpon>202508202108243_PalabraValidacion.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\JugadorEscalafonVM.cs" />
     <Compile Include="Models\Partida.cs" />
@@ -236,6 +240,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\202508191644039_InitialCreate.resx">
       <DependentUpon>202508191644039_InitialCreate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508202108243_PalabraValidacion.resx">
+      <DependentUpon>202508202108243_PalabraValidacion.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
