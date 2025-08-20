@@ -26,5 +26,10 @@ namespace Ahorcado_KimberlyLeon.Controllers
 
             return View();
         }
+        public ActionResult Reglas()
+        {
+            return View();
+        }
+
     }
 }

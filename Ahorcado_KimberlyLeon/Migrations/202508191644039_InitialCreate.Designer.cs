@@ -7,13 +7,13 @@ namespace Ahorcado_KimberlyLeon.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.5.1")]
-    public sealed partial class SyncModelo_1 : IMigrationMetadata
+    public sealed partial class InitialCreate : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(SyncModelo_1));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(InitialCreate));
         
         string IMigrationMetadata.Id
         {
-            get { return "202508190737074_SyncModelo_1"; }
+            get { return "202508191644039_InitialCreate"; }
         }
         
         string IMigrationMetadata.Source
