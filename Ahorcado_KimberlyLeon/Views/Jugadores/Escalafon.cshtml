@@ -2,13 +2,13 @@
 @{
     ViewBag.Title = "Escalafón";
 }
-
 <h2>Escalafón</h2>
 
 <table class="table table-striped">
     <thead>
         <tr>
             <th>Pos</th>
+            <th>Id</th>             @* ← el que ingresa la persona (Codigo) *@
             <th>Jugador</th>
             <th>Marcador</th>
             <th>G (F/N/D)</th>
@@ -20,14 +20,14 @@
             var pos = 1;
             foreach (var j in Model)
             {
-                <tr>
+                <tr data-idinterno="@j.Id" data-codigo="@j.Codigo">
                     <td>@pos</td>
+                    <td>@j.Codigo</td>  @* <<< AQUÍ *@
                     <td>@j.Nombre</td>
                     <td>@j.Marcador</td>
                     <td>@j.GanadasFacil/@j.GanadasNormal/@j.GanadasDificil</td>
                     <td>@j.PerdidasFacil/@j.PerdidasNormal/@j.PerdidasDificil</td>
                 </tr>
-;
                 pos++;
             }
         }
