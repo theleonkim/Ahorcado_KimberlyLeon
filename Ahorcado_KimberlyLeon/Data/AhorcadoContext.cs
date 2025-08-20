@@ -10,14 +10,14 @@ namespace Ahorcado_KimberlyLeon.Data
 
         public DbSet<Jugador> Jugadores { get; set; }
         public DbSet<Palabra> Palabras { get; set; }
-        public DbSet<Partida> Partidas { get; set; }   // ← FALTABA
+        public DbSet<Partida> Partidas { get; set; }  
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
             modelBuilder.Entity<Jugador>().ToTable("Jugadores");
             modelBuilder.Entity<Palabra>().ToTable("Palabras");
-            modelBuilder.Entity<Partida>().ToTable("Partidas");   // ← map explícito
+            modelBuilder.Entity<Partida>().ToTable("Partidas");   
             base.OnModelCreating(modelBuilder);
         }
     }

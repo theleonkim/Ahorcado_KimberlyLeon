@@ -10,6 +10,7 @@
     Func<char, bool> yaUsada = c =>
         letrasProbadas.IndexOf(c.ToString(), System.StringComparison.InvariantCultureIgnoreCase) >= 0;
 
+    // Única definición de 'terminado'
     bool terminado = (ViewBag.JuegoTerminado is bool b) && b;
 }
 
@@ -18,6 +19,13 @@
 <div class="text-center">
     <h3>Palabra: <span class="font-monospace">@ViewBag.PalabraOculta</span></h3>
     <h4>Intentos restantes: @ViewBag.IntentosRestantes</h4>
+
+    @{
+        var secs = (int)(ViewBag.SegundosRestantes ?? 0);
+    }
+    <div class="mb-3">
+        <span class="badge bg-dark fs-5" id="cronometro" data-seconds="@secs">--:--</span>
+    </div>
 
     @if (ViewBag.Mensaje != null)
     {
@@ -52,4 +60,45 @@
             @Html.ActionLink("Nueva partida", "Crear", "Partidas", null, new { @class = "btn btn-primary ms-2" })
         </div>
     }
+
+    @using (Html.BeginForm("Rendirse", "Partidas", FormMethod.Post, new { @class = "d-inline" }))
+    {
+        @Html.AntiForgeryToken()
+        <button type="submit"
+                class="btn btn-outline-danger"
+                onclick="return confirm('¿Seguro que quieres salir? Contará como derrota ( -@ViewBag.Penalizacion ).');"
+                @(terminado ? "disabled" : "")>
+            Salir / Rendirse ( -@ViewBag.Penalizacion )
+        </button>
+    }
+
+    @* Form oculto para derrota por tiempo *@
+    @using (Html.BeginForm("TiempoAgotado", "Partidas", FormMethod.Post, new { id = "formTiempoAgotado" }))
+    {
+        @Html.AntiForgeryToken()
+    }
+
+    <script>
+    (function() {
+      var el = document.getElementById('cronometro');
+      if (!el) return;
+      var total = parseInt(el.getAttribute('data-seconds') || '0', 10);
+      if (isNaN(total) || total <= 0) { el.textContent = '00:00'; return; }
+
+      var terminado = @((ViewBag.JuegoTerminado == true) ? "true" : "false");
+
+      function fmt(n){ return (n<10?'0':'') + n; }
+      function tick(){
+        var m = Math.floor(total / 60), s = total % 60;
+        el.textContent = fmt(m) + ':' + fmt(s);
+        total--;
+        if (total < 0) {
+          if (!terminado) document.getElementById('formTiempoAgotado').submit();
+          return;
+        }
+        setTimeout(tick, 1000);
+      }
+      tick();
+    })();
+    </script>
 </div>

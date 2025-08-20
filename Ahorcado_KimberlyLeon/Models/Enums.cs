@@ -1,6 +1,6 @@
 ﻿namespace Ahorcado_KimberlyLeon.Models
 {
-    // ÚNICA definición de Dificultad (ENUM). NO declares ninguna clase llamada Dificultad.
+    
     public enum Dificultad
     {
         Facil = 0,

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ahorcado_KimberlyLeon.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -47,7 +48,6 @@ namespace Ahorcado_KimberlyLeon.Models
         public TimeSpan TiempoMaximo => GetTiempoMaximo(Dificultad);
 
         // ---------- Wrappers de compatibilidad ----------
-        // Alias para que el código viejo que usa partida.Nivel compile.
         [NotMapped]
         public Dificultad Nivel
         {
@@ -127,10 +127,12 @@ namespace Ahorcado_KimberlyLeon.Models
             switch (d)
             {
                 case Dificultad.Facil: return TimeSpan.FromSeconds(90); // 1:30
+                case Dificultad.Normal: return TimeSpan.FromSeconds(60); // 1:00
                 case Dificultad.Dificil: return TimeSpan.FromSeconds(30); // 0:30
-                default: return TimeSpan.FromSeconds(60); // 1:00
+                default: return TimeSpan.FromSeconds(60);
             }
         }
+
 
         public static int GetDeltaPuntaje(bool ganada, Dificultad d)
         {
@@ -139,3 +141,7 @@ namespace Ahorcado_KimberlyLeon.Models
         }
     }
 }
+
+
+
+

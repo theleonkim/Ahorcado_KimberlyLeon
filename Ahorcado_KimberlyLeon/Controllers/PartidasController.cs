@@ -24,7 +24,7 @@ namespace Ahorcado_KimberlyLeon.Controllers
             return View();
         }
 
-        // POST: Partidas/Jugar  → crea la partida y redirige al tablero
+        // POST: Partidas/Jugar → crea la partida y redirige al tablero
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Jugar(int JugadorId, string Nivel)
@@ -52,7 +52,8 @@ namespace Ahorcado_KimberlyLeon.Controllers
                 JugadorId = jugador.Id,
                 PalabraId = palabra.Id,
                 Dificultad = dificultad,
-                FechaInicio = DateTime.Now
+                // UTC para que el cronómetro server-side sea consistente
+                FechaInicio = DateTime.UtcNow
             };
 
             db.Partidas.Add(partida);
@@ -63,17 +64,17 @@ namespace Ahorcado_KimberlyLeon.Controllers
             Session["PartidaId"] = partida.Id;
             Session["PalabraSecreta"] = palabra.Texto;
             Session["PalabraOculta"] = InicializarOculta(palabra.Texto); // oculta solo letras
-            Session["IntentosRestantes"] = 5;
+            Session["IntentosRestantes"] = 5;  // si quieres, ajusta por dificultad
             Session["LetrasAdivinadas"] = new List<char>();
             Session["JuegoTerminado"] = false;
             Session["Mensaje"] = null;
 
-            return RedirectToAction("Jugar");   // ← tablero
+            return RedirectToAction("Jugar");   // tablero
         }
 
-        // GET: Partidas/Jugar  → tablero (NECESARIA)
+        // GET: Partidas/Jugar → tablero
         [HttpGet]
-        public ActionResult Jugar()
+        public async Task<ActionResult> Jugar()
         {
             if (Session["PalabraSecreta"] == null)
                 return RedirectToAction("Crear");
@@ -85,15 +86,61 @@ namespace Ahorcado_KimberlyLeon.Controllers
             ViewBag.LetrasProbadas = string.Join(", ",
                 (Session["LetrasAdivinadas"] as List<char>) ?? new List<char>());
 
+            // segundos restantes (server-side) y penalización por rendirse (-1/-2/-3)
+            int segundosRestantes = 0;
+            int penalizacion = 1;
+
+            if (Session["PartidaId"] is int pid)
+            {
+                var p = await db.Partidas.AsNoTracking().FirstOrDefaultAsync(x => x.Id == pid);
+                if (p != null)
+                {
+                    var max = Partida.GetTiempoMaximo(p.Dificultad); // 90/60/30
+                    // TRATAR SIEMPRE FechaInicio como UTC (no ToUniversalTime)
+                    var inicioUtc = DateTime.SpecifyKind(p.FechaInicio, DateTimeKind.Utc);
+                    var deadline = inicioUtc + max;
+
+                    // Ceil + límites para no perder 1s y no pasarse del máximo
+                    segundosRestantes = (int)Math.Ceiling((deadline - DateTime.UtcNow).TotalSeconds);
+                    var maxSecs = (int)max.TotalSeconds;
+                    if (segundosRestantes < 0) segundosRestantes = 0;
+                    if (segundosRestantes > maxSecs) segundosRestantes = maxSecs;
+
+                    penalizacion = (p.Dificultad == Dificultad.Facil) ? 1 :
+                                   (p.Dificultad == Dificultad.Normal ? 2 : 3);
+                }
+            }
+            ViewBag.SegundosRestantes = segundosRestantes;
+            ViewBag.Penalizacion = penalizacion;
+
             return View("Jugar"); // Views/Partidas/Jugar.cshtml
         }
 
-        // GET: Partidas/AdivinarLetra?letra=X  → usamos GET para poder usar <a href=...>
+        // GET: Partidas/AdivinarLetra?letra=X
         [HttpGet]
         public async Task<ActionResult> AdivinarLetra(char letra)
         {
             if (Session["JuegoTerminado"] is bool fin && fin)
                 return RedirectToAction("Jugar");
+
+            // Expiración por tiempo (server-side)
+            if (Session["PartidaId"] != null)
+            {
+                var p = await db.Partidas.FindAsync((int)Session["PartidaId"]);
+                if (p != null)
+                {
+                    var inicioUtc = DateTime.SpecifyKind(p.FechaInicio, DateTimeKind.Utc);
+                    var deadline = inicioUtc + Partida.GetTiempoMaximo(p.Dificultad);
+
+                    if (DateTime.UtcNow > deadline)
+                    {
+                        var palabraSecretaX = (Session["PalabraSecreta"] as string) ?? "";
+                        Session["Mensaje"] = $"Tiempo agotado. La palabra era: {palabraSecretaX.ToUpper()}";
+                        await FinalizarPartida(false);
+                        return RedirectToAction("Jugar");
+                    }
+                }
+            }
 
             string palabraSecreta = Session["PalabraSecreta"] as string ?? "";
             string palabraOculta = Session["PalabraOculta"] as string ?? "";
@@ -130,14 +177,16 @@ namespace Ahorcado_KimberlyLeon.Controllers
                     Session["IntentosRestantes"] = intentosRestantes;
 
                     // (opcional) persistir fallo si el modelo tiene IntentosFallidos
-                    var partidaId = (int)Session["PartidaId"];
-                    var partidaDb = await db.Partidas.FindAsync(partidaId);
-                    var prop = partidaDb?.GetType().GetProperty("IntentosFallidos");
-                    if (prop != null && prop.CanWrite)
+                    if (Session["PartidaId"] is int partidaIdPersist)
                     {
-                        int actuales = (int)(prop.GetValue(partidaDb) ?? 0);
-                        prop.SetValue(partidaDb, actuales + 1);
-                        await db.SaveChangesAsync();
+                        var partidaDb = await db.Partidas.FindAsync(partidaIdPersist);
+                        var prop = partidaDb?.GetType().GetProperty("IntentosFallidos");
+                        if (prop != null && prop.CanWrite)
+                        {
+                            int actuales = (int)(prop.GetValue(partidaDb) ?? 0);
+                            prop.SetValue(partidaDb, actuales + 1);
+                            await db.SaveChangesAsync();
+                        }
                     }
                 }
             }
@@ -145,13 +194,11 @@ namespace Ahorcado_KimberlyLeon.Controllers
             // ¿terminó?
             if ((Session["PalabraOculta"] as string) == palabraSecreta)
             {
-                // Al ganar, también mostramos la palabra
-                Session["Mensaje"] = $"¡Felicidades, ganaste! La palabra era: {palabraSecreta.ToUpper()}";
+                Session["Mensaje"] = "¡Felicidades, ganaste!";
                 await FinalizarPartida(true);
             }
             else if (intentosRestantes <= 0)
             {
-                // Al perder, mostramos cuál era la palabra
                 Session["Mensaje"] = $"¡Lo siento, perdiste! La palabra era: {palabraSecreta.ToUpper()}";
                 await FinalizarPartida(false);
             }
@@ -159,8 +206,39 @@ namespace Ahorcado_KimberlyLeon.Controllers
             return RedirectToAction("Jugar");
         }
 
+        // POST: Partidas/Rendirse → cuenta como derrota
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Rendirse()
+        {
+            if (Session["JuegoTerminado"] is bool fin && fin)
+                return RedirectToAction("Jugar");
+
+            var palabraSecreta = (Session["PalabraSecreta"] as string) ?? "";
+            Session["Mensaje"] = $"Te retiraste. La palabra era: {palabraSecreta.ToUpper()}";
+
+            await FinalizarPartida(false);
+            return RedirectToAction("Jugar");
+        }
+
+        // POST: Partidas/TiempoAgotado → derrota por tiempo
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> TiempoAgotado()
+        {
+            if (Session["JuegoTerminado"] is bool fin && fin)
+                return RedirectToAction("Jugar");
+
+            var palabraSecreta = (Session["PalabraSecreta"] as string) ?? "";
+            Session["Mensaje"] = $"Tiempo agotado. La palabra era: {palabraSecreta.ToUpper()}";
+
+            await FinalizarPartida(false);
+            return RedirectToAction("Jugar");
+        }
+
         // ---------- helpers de dominio ----------
 
+        // Cierra partida + actualiza marcador del jugador según dificultad
         private async Task FinalizarPartida(bool ganada)
         {
             int partidaId = (int)Session["PartidaId"];
@@ -171,22 +249,28 @@ namespace Ahorcado_KimberlyLeon.Controllers
                 if (propGanada != null && propGanada.CanWrite) propGanada.SetValue(partida, ganada);
 
                 var propFechaFin = partida.GetType().GetProperty("FechaFin");
-                if (propFechaFin != null && propFechaFin.CanWrite) propFechaFin.SetValue(partida, DateTime.Now);
+                if (propFechaFin != null && propFechaFin.CanWrite) propFechaFin.SetValue(partida, DateTime.UtcNow);
 
                 var jugador = await db.Jugadores.FindAsync(partida.JugadorId);
                 if (jugador != null)
                 {
                     if (ganada)
                     {
-                        if (partida.Dificultad == Dificultad.Facil) jugador.GanadasFacil++;
-                        else if (partida.Dificultad == Dificultad.Normal) jugador.GanadasNormal++;
-                        else jugador.GanadasDificil++;
+                        switch (partida.Dificultad)
+                        {
+                            case Dificultad.Facil: jugador.GanadasFacil++; break;
+                            case Dificultad.Normal: jugador.GanadasNormal++; break;
+                            case Dificultad.Dificil: jugador.GanadasDificil++; break;
+                        }
                     }
                     else
                     {
-                        if (partida.Dificultad == Dificultad.Facil) jugador.PerdidasFacil++;
-                        else if (partida.Dificultad == Dificultad.Normal) jugador.PerdidasNormal++;
-                        else jugador.PerdidasDificil++;
+                        switch (partida.Dificultad)
+                        {
+                            case Dificultad.Facil: jugador.PerdidasFacil++; break;
+                            case Dificultad.Normal: jugador.PerdidasNormal++; break;
+                            case Dificultad.Dificil: jugador.PerdidasDificil++; break;
+                        }
                     }
                 }
             }
@@ -198,7 +282,8 @@ namespace Ahorcado_KimberlyLeon.Controllers
         private static Dificultad ParseDificultad(string nivel)
         {
             if (string.IsNullOrWhiteSpace(nivel)) return Dificultad.Normal;
-            if (Enum.TryParse(nivel.Trim(), true, out Dificultad parsed)) return parsed;
+            Dificultad parsed;
+            if (Enum.TryParse(nivel.Trim(), true, out parsed)) return parsed;
 
             var n = nivel.Trim().ToLowerInvariant();
             if (n.Contains("facil") || n.Contains("fácil")) return Dificultad.Facil;
