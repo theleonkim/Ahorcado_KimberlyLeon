@@ -8,7 +8,7 @@
         public override void Up()
         {
             CreateTable(
-                "dbo.Jugadors",
+                "dbo.Jugadores",
                 c => new
                     {
                         Id = c.Int(nullable: false, identity: true),
@@ -39,15 +39,16 @@
                         Id = c.Int(nullable: false, identity: true),
                         JugadorId = c.Int(nullable: false),
                         PalabraId = c.Int(nullable: false),
-                        Nivel = c.Int(nullable: false),
+                        Dificultad = c.Int(nullable: false),
+                        Ganada = c.Boolean(nullable: false),
+                        IntentosFallidos = c.Int(nullable: false),
                         Estado = c.Int(nullable: false),
-                        InicioUtc = c.DateTime(nullable: false),
-                        FinUtc = c.DateTime(),
-                        IntentosRestantes = c.Int(nullable: false),
                         LetrasProbadas = c.String(),
+                        FechaInicio = c.DateTime(nullable: false),
+                        FechaFin = c.DateTime(),
                     })
                 .PrimaryKey(t => t.Id)
-                .ForeignKey("dbo.Jugadors", t => t.JugadorId, cascadeDelete: true)
+                .ForeignKey("dbo.Jugadores", t => t.JugadorId, cascadeDelete: true)
                 .ForeignKey("dbo.Palabras", t => t.PalabraId, cascadeDelete: true)
                 .Index(t => t.JugadorId)
                 .Index(t => t.PalabraId);
@@ -57,12 +58,12 @@
         public override void Down()
         {
             DropForeignKey("dbo.Partidas", "PalabraId", "dbo.Palabras");
-            DropForeignKey("dbo.Partidas", "JugadorId", "dbo.Jugadors");
+            DropForeignKey("dbo.Partidas", "JugadorId", "dbo.Jugadores");
             DropIndex("dbo.Partidas", new[] { "PalabraId" });
             DropIndex("dbo.Partidas", new[] { "JugadorId" });
             DropTable("dbo.Partidas");
             DropTable("dbo.Palabras");
-            DropTable("dbo.Jugadors");
+            DropTable("dbo.Jugadores");
         }
     }
 }

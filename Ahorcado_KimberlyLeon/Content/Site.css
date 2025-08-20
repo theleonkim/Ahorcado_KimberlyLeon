@@ -1,115 +1,262 @@
-﻿/* ===========================
-   Fuente y estilos globales
-=========================== */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+﻿/* ========= Base ========= */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap');
+
+:root {
+    --nav-h: 92px; /* alto real del navbar */
+    --purp-1: #a77df6;
+    --purp-2: #b388ff;
+    --purp-3: #b38cff;
+    --text: #2a1745;
+    --bg: #f7f4fb;
+}
+
+html, body {
+    height: 100%
+}
 
 body {
-    font-family: 'Montserrat', sans-serif;
-    background-color: #f7f4fb;
-    color: #333;
+    font-family: 'Montserrat',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding-top: calc(var(--nav-h) + 18px); /* baja el contenido bajo la barra */
+}
+
+/* ========= Navbar ========= */
+.navbar.custom-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--nav-h);
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    background: linear-gradient(90deg,var(--purp-1) 0%,var(--purp-2) 55%,var(--purp-3) 100%);
+    box-shadow: 0 10px 26px rgba(111,66,193,.18);
+    z-index: 1030; /* por encima del contenido */
+}
+
+    /* Contenedor interno a flex (ignora floats de Bootstrap) */
+    .navbar.custom-navbar .container {
+        height: 100%;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+    }
+
+/* Marca */
+.custom-navbar .navbar-brand {
+    color: #fff !important;
+    font-weight: 800;
+    font-size: 28px;
+    letter-spacing: .2px;
+    text-shadow: 0 1px 0 rgba(0,0,0,.06);
     margin: 0;
     padding: 0;
 }
 
-/* ===========================
-   Navbar
-=========================== */
-.navbar {
-    background-color: #a78bfa !important; /* Lila suave */
-    border: none;
-    border-radius: 0;
+/* Menú a la derecha en fila */
+.custom-navbar .top-menu {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 28px;
+    list-style: none;
+    margin: 0 !important;
+    padding: 0 !important;
+    float: none !important;
 }
 
-.navbar-brand,
-.navbar-nav > li > a {
-    color: #4b0082 !important; /* Morado oscuro */
-    font-weight: 600;
-}
-
-    .navbar-nav > li > a:hover,
-    .navbar-brand:hover {
-        color: #fff !important;
+    .custom-navbar .top-menu > li {
+        display: block
     }
 
-/* ===========================
-   Encabezados
-=========================== */
-h1, h2, h3, h4 {
-    color: #4b0082;
-    font-weight: 700;
+    /* Enlaces */
+    .custom-navbar .top-menu a {
+        display: inline-block;
+        color: #fff !important;
+        font-weight: 700;
+        text-decoration: none !important;
+        padding: 10px 16px;
+        line-height: 1;
+        border-radius: 12px;
+        background: transparent !important; /* mata el pill translúcido */
+        border: 2px solid transparent;
+        transition: background .15s ease, box-shadow .15s ease, transform .15s ease;
+    }
+
+        .custom-navbar .top-menu a:hover {
+            background: rgba(255,255,255,.14) !important;
+            box-shadow: 0 6px 14px rgba(0,0,0,.10);
+            transform: translateY(-1px);
+        }
+        /* Activo (IsActive helper o .active) */
+        .custom-navbar .top-menu li.active > a,
+        .custom-navbar .top-menu a.active {
+            background: rgba(255,255,255,.18) !important;
+            box-shadow: 0 6px 16px rgba(0,0,0,.12);
+        }
+
+/* Quita el hamburguesa y estilos colapsables en cualquier tamaño */
+.navbar-toggle {
+    display: none !important;
 }
 
-/* ===========================
-   Botones tipo nube
-=========================== */
+.navbar-nav {
+    float: none !important;
+}
+
+/* ========= Títulos ========= */
+h1, h2, h3, h4 {
+    color: #3a1f66;
+    font-weight: 800
+}
+
+h1 {
+    font-size: 42px
+}
+
+h2 {
+    font-size: 32px
+}
+
+/* ========= Botones tipo nube ========= */
 .btn-cloud {
-    background-color: #a78bfa;
-    color: #fff;
-    border: none;
-    border-radius: 50px; /* Forma de nube */
-    padding: 10px 25px;
-    font-weight: 600;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease-in-out;
+    background: #fff;
+    color: #5b31a6 !important;
+    border: 2px solid #b18bff;
+    border-radius: 50px;
+    padding: 14px 26px;
+    font-weight: 700;
+    box-shadow: 0 8px 22px rgba(100,43,255,.16);
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
 }
 
     .btn-cloud:hover {
-        background-color: #8b5cf6;
-        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
         transform: translateY(-2px);
+        box-shadow: 0 12px 28px rgba(100,43,255,.22);
+        border-color: #9266ff;
     }
 
-/* ===========================
-   Tablas
-=========================== */
+/* ========= Tablas / Formularios / Alertas ========= */
 .table {
-    background-color: #fff;
-    border-radius: 8px;
-    overflow: hidden;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden
 }
 
     .table th {
-        background-color: #c4b5fd;
-        color: #4b0082;
-        text-align: center;
+        background: #d8c6ff;
+        color: #361a6b;
+        text-align: center
     }
 
     .table td {
         text-align: center;
-        vertical-align: middle;
+        vertical-align: middle
     }
 
-/* ===========================
-   Formularios
-=========================== */
 .form-control {
-    border-radius: 8px;
-    border: 1px solid #c4b5fd;
-    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #cbb7ff;
+    padding: 10px 12px;
 }
 
     .form-control:focus {
-        border-color: #a78bfa;
-        box-shadow: 0 0 4px rgba(167, 139, 250, 0.5);
+        border-color: #a77df6;
+        box-shadow: 0 0 0 3px rgba(167,139,250,.35);
+        outline: 0;
     }
 
-/* ===========================
-   Alertas
-=========================== */
 .alert-success {
-    background-color: #d8b4fe;
-    color: #4b0082;
-    border: none;
-    border-radius: 8px;
+    background: #e7dbff;
+    color: #3a1f66;
+    border: 0;
+    border-radius: 10px;
 }
 
-/* ===========================
-   Footer
-=========================== */
+/* ========= Footer ========= */
 footer {
-    background-color: #a78bfa;
+    background: linear-gradient(90deg,var(--purp-1) 0%,var(--purp-2) 55%,var(--purp-3) 100%);
     color: #fff;
-    padding: 15px 0;
+    padding: 18px 0;
     text-align: center;
-    margin-top: 40px;
+    margin-top: 48px;
+    border-top-left-radius: 14px;
+    border-top-right-radius: 14px;
+    box-shadow: 0 -8px 24px rgba(111,66,193,.16) inset;
 }
+/* ===========================
+   Empujar el contenido bajo el navbar fijo
+   (ajusta --nav-h si tu barra es más alta/baja)
+=========================== */
+:root {
+    --nav-h: 140px; /* ALTURA EFECTIVA DEL NAVBAR */
+}
+
+body {
+    padding-top: var(--nav-h) !important; /* deja espacio bajo la barra */
+}
+
+/* por si alguna vista usa estos contenedores */
+.container.body-content,
+.body-content,
+main,
+.page-content {
+    margin-top: 16px; /* un respiro extra */
+}
+
+/* al usar enlaces con #ancla, que no queden escondidos bajo la barra */
+html {
+    scroll-padding-top: var(--nav-h);
+}
+
+/* Responsivo: si la barra se compacta en pantallas más angostas */
+@media (max-width: 1200px) {
+    :root {
+        --nav-h: 120px;
+    }
+}
+
+@media (max-wid
+/* Toast (flash message) */
+.app-toast {
+    position: fixed;
+    top: calc(var(--nav-h, 140px) + 12px); /* debajo del navbar fijo */
+    right: 20px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    color: #fff;
+    box-shadow: 0 10px 24px rgba(0,0,0,.18);
+    z-index: 3000;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity .28s ease, transform .28s ease;
+    font-weight: 700;
+    letter-spacing: .2px;
+}
+
+.app-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.app-toast.hide {
+    opacity: 0;
+    transform: translateY(-6px);
+}
+
+/* Colores por tipo */
+.app-toast-success {
+    background: #16a34a;
+}
+/* verde */
+.app-toast-error {
+    background: #ef4444;
+}
+/* rojo  */
+.app-toast-info {
+    background: #3b82f6;
+}
+/* azul  */

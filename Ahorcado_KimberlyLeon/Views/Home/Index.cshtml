@@ -2,15 +2,65 @@
     ViewBag.Title = "Inicio";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<div class="text-center mt-4">
-    <img src="https://i.imgur.com/KhHZrr3.png" alt="Ahorcado" style="width:120px;filter:drop-shadow(0 4px 6px rgba(0,0,0,.2));" />
-    <h1 class="display-5 fw-bold mt-3">Juego del Ahorcado</h1>
-    <p class="mt-2">Selecciona una opción:</p>
 
-    <div class="d-flex justify-content-center flex-wrap gap-3 mt-4">
-        <a href="@Url.Action("Crear","Palabras")" class="btn-cloud">Agregar palabra</a>
-        <a href="@Url.Action("Crear","Jugadores")" class="btn-cloud">Crear jugador</a>
-        <a href="@Url.Action("Crear","Partidas")" class="btn-cloud">Nueva partida</a>
-        <a href="@Url.Action("Escalafon","Jugadores")" class="btn-cloud">Escalafón</a>
+<section class="home text-center">
+    <img src="https://i.imgur.com/KhHZrr3.png" alt="Ahorcado" class="home-logo" />
+    <h1 class="home-title">Juego del Ahorcado</h1>
+    <p class="home-sub">Selecciona una opción:</p>
+
+    <div class="home-actions">
+        @Html.ActionLink("Agregar palabra", "Crear", "Palabras", null, new { @class = "btn-cloud" })
+        @Html.ActionLink("Crear jugador", "Crear", "Jugadores", null, new { @class = "btn-cloud" })
+        @Html.ActionLink("Nueva partida", "Crear", "Partidas", null, new { @class = "btn-cloud" })
+        @Html.ActionLink("Escalafón", "Escalafon", "Jugadores", null, new { @class = "btn-cloud" })
+        
     </div>
-</div>
+</section>
+
+<style>
+    .home {
+        margin-top: 25px;
+    }
+
+    .home-logo {
+        width: 120px;
+        filter: drop-shadow(0 4px 6px rgba(0,0,0,.2));
+    }
+
+    .home-title {
+        font-weight: 800;
+        font-size: 42px;
+        margin: 16px 0 6px;
+        color: #3c126b;
+    }
+
+    .home-sub {
+        margin: 8px 0 20px;
+        color: #5a348a;
+    }
+
+    .home-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .btn-cloud {
+        display: inline-block;
+        padding: 12px 22px;
+        border-radius: 26px;
+        background: #fff;
+        border: 2px solid #c7a9ff;
+        color: #5a2bb7 !important;
+        text-decoration: none !important;
+        font-weight: 700;
+        box-shadow: 0 6px 18px rgba(100,0,200,.12);
+        transition: all .15s ease;
+    }
+
+        .btn-cloud:hover {
+            background: #f7f2ff;
+            transform: translateY(-1px);
+        }
+</style>

@@ -1,13 +1,22 @@
-﻿@model dynamic
-
-@{
+﻿@{
     ViewBag.Title = "Juego del Ahorcado";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Teclado con Ñ
+    var alfabeto = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ";
+
+    // Deshabilitar letras ya probadas
+    string letrasProbadas = (ViewBag.LetrasProbadas as string) ?? "";
+    Func<char, bool> yaUsada = c =>
+        letrasProbadas.IndexOf(c.ToString(), System.StringComparison.InvariantCultureIgnoreCase) >= 0;
+
+    bool terminado = (ViewBag.JuegoTerminado is bool b) && b;
 }
 
 <h2>Juego del Ahorcado</h2>
 
 <div class="text-center">
-    <h3>Palabra: @ViewBag.PalabraOculta</h3>
+    <h3>Palabra: <span class="font-monospace">@ViewBag.PalabraOculta</span></h3>
     <h4>Intentos restantes: @ViewBag.IntentosRestantes</h4>
 
     @if (ViewBag.Mensaje != null)
@@ -15,17 +24,32 @@
         <div class="alert alert-info">@ViewBag.Mensaje</div>
     }
 
-    @if (ViewBag.JuegoTerminado == null || !ViewBag.JuegoTerminado)
+    @if (!terminado)
     {
-        <div class="btn-group-sm">
-            @for (char c = 'A'; c <= 'Z'; c++)
+        <div class="btn-group-sm" role="group" aria-label="Teclado">
+            @foreach (var c in alfabeto)
             {
-                <a href="@Url.Action("AdivinarLetra", new { letra = c })" class="btn btn-outline-primary" style="margin: 2px;">@c</a>
+                if (yaUsada(c))
+                {
+                    <a class="btn btn-secondary disabled" style="margin:2px;" aria-disabled="true">@c</a>
+                }
+                else
+                {
+                    <a href="@Url.Action("AdivinarLetra","Partidas", new { letra = c })"
+                       class="btn btn-outline-primary" style="margin:2px;">@c</a>
+                }
             }
         </div>
+
+        <p class="text-muted mt-2">
+            Letras probadas: @letrasProbadas
+        </p>
     }
     else
     {
-        @Html.ActionLink("Volver al Inicio", "Index", "Home", null, new { @class = "btn btn-success" })
+        <div class="mt-3">
+            @Html.ActionLink("Volver al Inicio", "Index", "Home", null, new { @class = "btn btn-success" })
+            @Html.ActionLink("Nueva partida", "Crear", "Partidas", null, new { @class = "btn btn-primary ms-2" })
+        </div>
     }
 </div>

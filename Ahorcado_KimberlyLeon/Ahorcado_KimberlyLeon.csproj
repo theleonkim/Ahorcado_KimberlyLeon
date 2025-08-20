@@ -124,19 +124,12 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\202508132123223_InitialCreate.cs" />
-    <Compile Include="Migrations\202508132123223_InitialCreate.Designer.cs">
-      <DependentUpon>202508132123223_InitialCreate.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202508190620027_InitialMigration.cs" />
-    <Compile Include="Migrations\202508190620027_InitialMigration.Designer.cs">
-      <DependentUpon>202508190620027_InitialMigration.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202508190737074_SyncModelo_1.cs" />
-    <Compile Include="Migrations\202508190737074_SyncModelo_1.Designer.cs">
-      <DependentUpon>202508190737074_SyncModelo_1.cs</DependentUpon>
+    <Compile Include="Migrations\202508191644039_InitialCreate.cs" />
+    <Compile Include="Migrations\202508191644039_InitialCreate.Designer.cs">
+      <DependentUpon>202508191644039_InitialCreate.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\JugadorEscalafonVM.cs" />
     <Compile Include="Models\Partida.cs" />
     <Compile Include="Models\Jugador.cs" />
     <Compile Include="Models\Enums.cs" />
@@ -194,6 +187,7 @@
     <Content Include="Scripts\bootstrap.esm.js.map" />
     <Content Include="Scripts\bootstrap.bundle.min.js.map" />
     <Content Include="Scripts\bootstrap.bundle.js.map" />
+    <Content Include="README.md" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -228,11 +222,11 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Palabras\Index.cshtml" />
     <Content Include="Views\Palabras\Crear.cshtml" />
-    <Content Include="Views\Home\Privacy.cshtml" />
     <Content Include="Views\Jugadores\Crear.cshtml" />
-    <Content Include="Views\Jugadores\Escalafón.cshtml" />
+    <Content Include="Views\Jugadores\Escalafon.cshtml" />
     <Content Include="Views\Partidas\Crear.cshtml" />
     <Content Include="Views\Partidas\Jugar.cshtml" />
+    <Content Include="Views\Home\Reglas.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -242,14 +236,8 @@
     <Content Include="Scripts\jquery-3.7.0.min.map" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\202508132123223_InitialCreate.resx">
-      <DependentUpon>202508132123223_InitialCreate.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202508190620027_InitialMigration.resx">
-      <DependentUpon>202508190620027_InitialMigration.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202508190737074_SyncModelo_1.resx">
-      <DependentUpon>202508190737074_SyncModelo_1.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\202508191644039_InitialCreate.resx">
+      <DependentUpon>202508191644039_InitialCreate.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

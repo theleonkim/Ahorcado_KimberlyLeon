@@ -3,6 +3,7 @@ using Ahorcado_KimberlyLeon.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,72 +18,62 @@ namespace Ahorcado_KimberlyLeon.Controllers
         // GET: Partidas/Crear
         public async Task<ActionResult> Crear()
         {
-            ViewBag.JugadorId = new SelectList(await db.Jugadores.ToListAsync(), "Id", "Nombre");
+            ViewBag.JugadorId = new SelectList(
+                await db.Jugadores.AsNoTracking().ToListAsync(), "Id", "Nombre");
+            ViewBag.Niveles = new SelectList(new[] { "Facil", "Normal", "Dificil" });
             return View();
         }
 
-        // POST: Partidas/Jugar  (antes le llamabas Crear -> ahora Jugar crea la partida)
+        // POST: Partidas/Jugar  → crea la partida y redirige al tablero
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Jugar(int JugadorId, string Nivel)
         {
-            // 1) Validar jugador
             var jugador = await db.Jugadores.FindAsync(JugadorId);
-            if (jugador == null)
-            {
-                return HttpNotFound();
-            }
+            if (jugador == null) return HttpNotFound();
 
-            // 2) Tomar una palabra disponible al azar
+            // palabra aleatoria no usada
             var palabra = await db.Palabras
                                   .Where(p => !p.Usada)
                                   .OrderBy(p => Guid.NewGuid())
                                   .FirstOrDefaultAsync();
-
             if (palabra == null)
             {
                 ViewBag.MensajeError = "No hay más palabras disponibles en el diccionario.";
-                ViewBag.JugadorId = new SelectList(await db.Jugadores.ToListAsync(), "Id", "Nombre");
+                ViewBag.JugadorId = new SelectList(await db.Jugadores.AsNoTracking().ToListAsync(), "Id", "Nombre");
+                ViewBag.Niveles = new SelectList(new[] { "Facil", "Normal", "Dificil" });
                 return View("Crear");
             }
 
-            // 3) Parsear nivel (string -> enum Dificultad)
-            var dificultad = ParseDificultad(Nivel); // Facil/Normal/Dificil (default: Normal)
+            var dificultad = ParseDificultad(Nivel);
 
-            // 4) Crear partida (usa enum; NO asignes strings a Dificultad)
-            var nuevaPartida = new Partida
+            var partida = new Partida
             {
                 JugadorId = jugador.Id,
                 PalabraId = palabra.Id,
                 Dificultad = dificultad,
-                FechaInicio = DateTime.Now,
-                // Las siguientes propiedades existen si tu modelo las tiene; si no, no pasa nada por omitirlas:
-                // IntentosFallidos = 0,
-                // Ganada = false,
-                // Estado = EstadoPartida.EnCurso
+                FechaInicio = DateTime.Now
             };
 
-            db.Partidas.Add(nuevaPartida);
-
-            // Marcar palabra como usada (según tu requerimiento)
-            palabra.Usada = true;
-
+            db.Partidas.Add(partida);
+            palabra.Usada = true; // si tu consigna lo pide
             await db.SaveChangesAsync();
 
-            // 5) Estado de sesión para la mecánica de UI
-            Session["PartidaId"] = nuevaPartida.Id;
-            Session["PalabraSecreta"] = palabra.Texto; // ajusta si tu propiedad se llama distinto
-            Session["PalabraOculta"] = new string('_', palabra.Texto.Length);
-            Session["IntentosRestantes"] = 5; // el enunciado pide 5 fallos máx
+            // Estado de juego en sesión
+            Session["PartidaId"] = partida.Id;
+            Session["PalabraSecreta"] = palabra.Texto;
+            Session["PalabraOculta"] = InicializarOculta(palabra.Texto); // oculta solo letras
+            Session["IntentosRestantes"] = 5;
             Session["LetrasAdivinadas"] = new List<char>();
             Session["JuegoTerminado"] = false;
             Session["Mensaje"] = null;
 
-            return RedirectToAction("Juego");
+            return RedirectToAction("Jugar");   // ← tablero
         }
 
-        // GET: Partidas/Juego
-        public ActionResult Juego()
+        // GET: Partidas/Jugar  → tablero (NECESARIA)
+        [HttpGet]
+        public ActionResult Jugar()
         {
             if (Session["PalabraSecreta"] == null)
                 return RedirectToAction("Crear");
@@ -91,66 +82,67 @@ namespace Ahorcado_KimberlyLeon.Controllers
             ViewBag.IntentosRestantes = Session["IntentosRestantes"];
             ViewBag.Mensaje = Session["Mensaje"];
             ViewBag.JuegoTerminado = Session["JuegoTerminado"];
+            ViewBag.LetrasProbadas = string.Join(", ",
+                (Session["LetrasAdivinadas"] as List<char>) ?? new List<char>());
 
-            return View();
+            return View("Jugar"); // Views/Partidas/Jugar.cshtml
         }
 
-        // POST: Partidas/AdivinarLetra
-        [HttpPost]
+        // GET: Partidas/AdivinarLetra?letra=X  → usamos GET para poder usar <a href=...>
+        [HttpGet]
         public async Task<ActionResult> AdivinarLetra(char letra)
         {
-            if (Session["JuegoTerminado"] is bool terminado && terminado)
-                return RedirectToAction("Juego");
+            if (Session["JuegoTerminado"] is bool fin && fin)
+                return RedirectToAction("Jugar");
 
-            string palabraSecreta = Session["PalabraSecreta"] as string;
-            string palabraOculta = Session["PalabraOculta"] as string;
-            int intentosRestantes = (int)Session["IntentosRestantes"];
+            string palabraSecreta = Session["PalabraSecreta"] as string ?? "";
+            string palabraOculta = Session["PalabraOculta"] as string ?? "";
+            int intentosRestantes = (int)(Session["IntentosRestantes"] ?? 5);
             var letrasAdivinadas = Session["LetrasAdivinadas"] as List<char> ?? new List<char>();
 
-            letra = char.ToLowerInvariant(letra);
+            letra = char.ToUpperInvariant(letra);
 
             if (!letrasAdivinadas.Contains(letra))
             {
                 letrasAdivinadas.Add(letra);
                 Session["LetrasAdivinadas"] = letrasAdivinadas;
 
-                bool letraEncontrada = false;
-                var nuevaPalabraOculta = new StringBuilder(palabraOculta);
+                bool acierto = false;
+                var nueva = new StringBuilder(palabraOculta);
+                var letraNorm = QuitarTildes(letra.ToString())[0];
 
                 for (int i = 0; i < palabraSecreta.Length; i++)
                 {
-                    if (char.ToLowerInvariant(palabraSecreta[i]) == letra)
+                    var normChar = QuitarTildes(palabraSecreta[i].ToString())[0];
+                    if (normChar == letraNorm && nueva[i] == '_')
                     {
-                        nuevaPalabraOculta[i] = palabraSecreta[i];
-                        letraEncontrada = true;
+                        // muestra el carácter original (con acento o Ñ)
+                        nueva[i] = palabraSecreta[i];
+                        acierto = true;
                     }
                 }
 
-                Session["PalabraOculta"] = nuevaPalabraOculta.ToString();
+                Session["PalabraOculta"] = nueva.ToString();
 
-                if (!letraEncontrada)
+                if (!acierto)
                 {
                     intentosRestantes--;
                     Session["IntentosRestantes"] = intentosRestantes;
 
-                    // Opcional: si tu modelo Partida tiene IntentosFallidos, persiste el fallo.
+                    // (opcional) persistir fallo si el modelo tiene IntentosFallidos
                     var partidaId = (int)Session["PartidaId"];
                     var partidaDb = await db.Partidas.FindAsync(partidaId);
-                    if (partidaDb != null)
+                    var prop = partidaDb?.GetType().GetProperty("IntentosFallidos");
+                    if (prop != null && prop.CanWrite)
                     {
-                        // Si tienes IntentosFallidos en el modelo:
-                        var prop = partidaDb.GetType().GetProperty("IntentosFallidos");
-                        if (prop != null && prop.CanWrite)
-                        {
-                            int actuales = (int)(prop.GetValue(partidaDb) ?? 0);
-                            prop.SetValue(partidaDb, actuales + 1);
-                            await db.SaveChangesAsync();
-                        }
+                        int actuales = (int)(prop.GetValue(partidaDb) ?? 0);
+                        prop.SetValue(partidaDb, actuales + 1);
+                        await db.SaveChangesAsync();
                     }
                 }
             }
 
-            // ¿Ganó?
+            // ¿terminó?
             if ((Session["PalabraOculta"] as string) == palabraSecreta)
             {
                 Session["Mensaje"] = "¡Felicidades, ganaste!";
@@ -162,8 +154,10 @@ namespace Ahorcado_KimberlyLeon.Controllers
                 await FinalizarPartida(false);
             }
 
-            return RedirectToAction("Juego");
+            return RedirectToAction("Jugar");
         }
+
+        // ---------- helpers de dominio ----------
 
         private async Task FinalizarPartida(bool ganada)
         {
@@ -171,18 +165,15 @@ namespace Ahorcado_KimberlyLeon.Controllers
             var partida = await db.Partidas.FindAsync(partidaId);
             if (partida != null)
             {
-                // Estas propiedades existen si tu modelo las tiene. Si no, comenta las que falten.
                 var propGanada = partida.GetType().GetProperty("Ganada");
                 if (propGanada != null && propGanada.CanWrite) propGanada.SetValue(partida, ganada);
 
                 var propFechaFin = partida.GetType().GetProperty("FechaFin");
                 if (propFechaFin != null && propFechaFin.CanWrite) propFechaFin.SetValue(partida, DateTime.Now);
 
-                // Actualizar estadísticas del jugador por dificultad (enum)
                 var jugador = await db.Jugadores.FindAsync(partida.JugadorId);
                 if (jugador != null)
                 {
-                    // Si tu modelo Jugador tiene estas propiedades:
                     if (ganada)
                     {
                         if (partida.Dificultad == Dificultad.Facil) jugador.GanadasFacil++;
@@ -202,21 +193,38 @@ namespace Ahorcado_KimberlyLeon.Controllers
             Session["JuegoTerminado"] = true;
         }
 
-        // ----------------- helpers -----------------
-
         private static Dificultad ParseDificultad(string nivel)
         {
             if (string.IsNullOrWhiteSpace(nivel)) return Dificultad.Normal;
+            if (Enum.TryParse(nivel.Trim(), true, out Dificultad parsed)) return parsed;
 
-            // intento directo (case-insensitive)
-            if (Enum.TryParse(nivel.Trim(), true, out Dificultad parsed))
-                return parsed;
-
-            // Fallback por palabras clave
-            var n = (nivel ?? "").Trim().ToLowerInvariant();
-            if (n.Contains("facil")) return Dificultad.Facil;
+            var n = nivel.Trim().ToLowerInvariant();
+            if (n.Contains("facil") || n.Contains("fácil")) return Dificultad.Facil;
             if (n.Contains("dific")) return Dificultad.Dificil;
             return Dificultad.Normal;
+        }
+
+        // Quita tildes pero respeta Ñ (para comparar)
+        private static string QuitarTildes(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return string.Empty;
+            s = s.Replace('ñ', '\u0001').Replace('Ñ', '\u0002');
+            var form = s.Normalize(NormalizationForm.FormD);
+            var arr = form.Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark).ToArray();
+            return new string(arr).Replace('\u0001', 'Ñ').Replace('\u0002', 'Ñ').ToUpperInvariant();
+        }
+
+        // Oculta solo letras (espacios/guiones se muestran)
+        private static string InicializarOculta(string texto)
+        {
+            var chars = texto.Select(ch => char.IsLetter(ch) ? '_' : ch).ToArray();
+            return new string(chars);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) db.Dispose();
+            base.Dispose(disposing);
         }
     }
 }

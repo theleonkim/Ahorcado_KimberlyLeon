@@ -1,0 +1,41 @@
+﻿@{
+    ViewBag.Title = "Reglas del Juego";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="rules container">
+    <h2 class="mb-30">Reglas del Juego</h2>
+
+    <div class="card rules-card">
+        <div class="card-body">
+            <h4>Objetivo</h4>
+            <p>Adivinar la palabra secreta antes de agotar los intentos o el tiempo.</p>
+
+            <h4>Cómo se juega</h4>
+            <ul>
+                <li>Tienes <strong>5 intentos fallidos</strong> como máximo.</li>
+                <li>Las letras correctas se revelan en su posición.</li>
+                <li>Las letras repetidas <strong>no consumen</strong> intentos.</li>
+                <li>Se aceptan <strong>acentos y Ñ</strong>; puedes adivinar con o sin tilde.</li>
+            </ul>
+
+            <h4>Dificultad</h4>
+            <ul>
+                <li><strong>Fácil:</strong> 90 segundos</li>
+                <li><strong>Normal:</strong> 60 segundos</li>
+                <li><strong>Difícil:</strong> 30 segundos</li>
+            </ul>
+            <p>La partida termina si te quedas sin intentos o si se acaba el tiempo.</p>
+
+            <h4>Puntuación</h4>
+            <ul>
+                <li>Ganar: +1 (Fácil), +2 (Normal), +3 (Difícil)</li>
+                <li>Perder: −1 (Fácil), −2 (Normal), −3 (Difícil)</li>
+            </ul>
+
+            <h4>Diccionario</h4>
+            <p>El juego usa un diccionario precargado de <strong>100+ palabras</strong> en español.</p>
+        </div>
+    </div>
+</section>
+

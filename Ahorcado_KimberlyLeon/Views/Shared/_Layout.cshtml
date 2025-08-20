@@ -1,37 +1,148 @@
 ﻿@{
-    // Elimina o comenta la línea 'Layout = null;'
-    ViewBag.Title = ViewBag.Title ?? "Ahorcado";
+    // Este archivo ES el layout raíz
+    Layout = null;
 }
+
+@functions{
+    // Marca de menú activo
+    public static string IsActive(System.Web.Mvc.ViewContext vc, string ctrl, string action = null)
+    {
+        var c = (vc.RouteData.Values["controller"] as string) ?? "";
+        var a = (vc.RouteData.Values["action"] as string) ?? "";
+        bool ok = c.Equals(ctrl, System.StringComparison.OrdinalIgnoreCase)
+               && (action == null || a.Equals(action, System.StringComparison.OrdinalIgnoreCase));
+        return ok ? "active" : "";
+    }
+}
+
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>@ViewBag.Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewBag.Title - Ahorcado | Kimberly León</title>
 
-    @Styles.Render("~/Content/css")
-    @Scripts.Render("~/bundles/modernizr")
+    <!-- CSS vía CDN + tu Site.css -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css"
+          integrity="sha256-x0Cddr5Kf4fJd9A4R6J0Wb8fL4sHcJv8J8m1u+4lZr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="~/Content/Site.css" />
+    <link rel="stylesheet" href="~/Content/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/Content/Site.css" />
+
+
+    
 </head>
 <body>
-    <header class="navbar navbar-expand navbar-light bg-light px-3">
-        <a class="navbar-brand" href="@Url.Action("Index","Home")">Ahorcado | Kimberly León</a>
-        <nav class="ms-3">
-            <a class="nav-link d-inline" href="@Url.Action("Index","Home")">Inicio</a>
-            <a class="nav-link d-inline" href="@Url.Action("Index","Palabras")">Diccionario</a>
-        </nav>
-    </header>
+    <!-- NAV -->
+    <nav class="navbar navbar-default navbar-fixed-top custom-navbar">
+        <div class="container">
+            <a class="navbar-brand" href="@Url.Action("Index","Home")">
+                Ahorcado | Kimberly León
+            </a>
+            <ul class="top-menu">
+                <li class="@(ViewContext.RouteData.Values["controller"]?.ToString()=="Home"
+                 && ViewContext.RouteData.Values["action"]?.ToString()=="Index" ? "active" : "")">
+                    <a class="menu-link menu-pill" href="@Url.Action("Index","Home")">Inicio</a>
+                </li>
 
-    <main class="container my-4">
-        @RenderBody()
-    </main>
+                <li class="@(ViewContext.RouteData.Values["controller"]?.ToString()=="Palabras" ? "active" : "")">
+                    <a class="menu-link menu-pill" href="@Url.Action("Index","Palabras")">Diccionario</a>
+                </li>
 
-    <footer class="container d-flex justify-content-between small text-muted py-3 border-top">
-        <span>© @DateTime.Now.Year · </span>
-        <span></span>
-    </footer>
+                <li class="@(ViewContext.RouteData.Values["controller"]?.ToString()=="Home"
+                 && ViewContext.RouteData.Values["action"]?.ToString()=="Reglas" ? "active" : "")">
+                    <a class="menu-link menu-pill" href="@Url.Action("Reglas","Home")">Reglas</a>
+                </li>
+            </ul>
 
-    @Scripts.Render("~/bundles/jquery")
-    
+        </div>
+    </nav>
+
+
+
+
+    <!-- CONTENIDO -->
+    <div class="container body-content">
+        @RenderBody()   <!-- ÚNICO lugar -->
+        <hr />
+        <footer><p>© @DateTime.Now.Year ·</p></footer>
+    </div>
+
+    <!-- JS: CDN + fallback local (ajusta nombres si usas otras versiones) -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="~/Scripts/jquery-3.7.1.min.js"><\\/script>');</script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js"
+            integrity="sha256-z/tdbK8f1mLkKT8N8mOe7+3lC9s8k9sWj5kR+q2Kx2c=" crossorigin="anonymous"></script>
+    <script>if (typeof ($.fn.modal) === "undefined") { document.write('<script src="~/Scripts/bootstrap.min.js"><\\/script>'); }</script>
+    @* Contenedor de toast *@
+    <div id="toast-ok" class="toast-ok" style="display:none;"></div>
+
+    <script>
+    (function () {
+        // Mensaje inyectado por el servidor (TempData)
+        var msg = '@(TempData["Ok"] ?? "")'.trim();
+        if (msg) {
+            var box = document.getElementById('toast-ok');
+            box.textContent = msg;
+            box.style.display = 'block';
+            // animación simple
+            setTimeout(function(){ box.classList.add('show'); }, 10);
+            setTimeout(function(){ box.classList.remove('show'); }, 3500);
+            setTimeout(function(){ box.style.display = 'none'; }, 4000);
+        }
+    })();
+    </script>
+
+    <style>
+        /* Toast arriba-derecha */
+        .toast-ok {
+            position: fixed;
+            top: 18px;
+            right: 18px;
+            z-index: 9999;
+            background: #1abc9c;
+            color: #fff;
+            font-weight: 700;
+            padding: 12px 16px;
+            border-radius: 10px;
+            box-shadow: 0 10px 26px rgba(0,0,0,.18);
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all .25s ease;
+        }
+
+            .toast-ok.show {
+                opacity: 1;
+                transform: translateY(0);
+            }
+    </style>
+
     @RenderSection("scripts", required: false)
+    @{
+        var toastMsg = TempData["Toast.Message"] as string;
+        var toastType = (TempData["Toast.Type"] as string) ?? "success";
+    }
+    @if (!string.IsNullOrEmpty(toastMsg))
+    {
+        <div id="app-toast" class="app-toast app-toast-@toastType">
+            @toastMsg
+        </div>
+        <script>
+            (function () {
+                var el = document.getElementById('app-toast');
+                if (!el) return;
+                // animar entrada
+                setTimeout(function () { el.classList.add('show'); }, 10);
+                // ocultar
+                setTimeout(function () { el.classList.remove('show'); el.classList.add('hide'); }, 2500);
+                // retirar del DOM
+                setTimeout(function () { if (el && el.parentNode) el.parentNode.removeChild(el); }, 3200);
+            })();
+        </script>
+    }
+
 </body>
 </html>

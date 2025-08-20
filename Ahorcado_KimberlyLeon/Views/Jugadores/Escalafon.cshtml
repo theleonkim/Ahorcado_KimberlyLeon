@@ -1,0 +1,35 @@
+﻿@model IEnumerable<Ahorcado_KimberlyLeon.Models.JugadorEscalafonVM>
+@{
+    ViewBag.Title = "Escalafón";
+}
+
+<h2>Escalafón</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Pos</th>
+            <th>Jugador</th>
+            <th>Marcador</th>
+            <th>G (F/N/D)</th>
+            <th>P (F/N/D)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var pos = 1;
+            foreach (var j in Model)
+            {
+                <tr>
+                    <td>@pos</td>
+                    <td>@j.Nombre</td>
+                    <td>@j.Marcador</td>
+                    <td>@j.GanadasFacil/@j.GanadasNormal/@j.GanadasDificil</td>
+                    <td>@j.PerdidasFacil/@j.PerdidasNormal/@j.PerdidasDificil</td>
+                </tr>
+;
+                pos++;
+            }
+        }
+    </tbody>
+</table>
