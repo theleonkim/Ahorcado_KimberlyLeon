@@ -94,25 +94,10 @@ flowchart TD
     J --> L["Escalafón"]
     K --> L
     L --> M["Fin"]
-    flowchart TD
-    A["Inicio"] --> B["Crear jugador (si no existe)"]
-    B --> C["Crear partida: seleccionar jugador + dificultad"]
-    C --> D["Asignar palabra no usada y marcarla 'Usada'"]
-    D --> E["Jugar: adivinar letra"]
-    E -- Acierta --> F["Revelar posiciones"]
-    E -- Falla --> G["Restar intento y registrar fallo"]
-    F --> H{"¿Palabra completa?"}
-    G --> I{"¿Quedan intentos?"}
-    H -- Sí --> J["Ganó: actualizar estadísticas y cerrar partida"]
-    H -- No --> E
-    I -- Sí --> E
-    I -- No --> K["Perdió: actualizar estadísticas y cerrar partida"]
-    J --> L["Escalafón"]
-    K --> L
-    L --> M["Fin"]
+   
 ```
 
-
+---
 
 
 ## 🔗 Referencias
