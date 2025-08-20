@@ -75,7 +75,7 @@ erDiagram
 
 ---
 
-## 🕹️ Flujo del juego (alto nivel)
+## 🧩 Flujo del juego (alto nivel)
 
 ```mermaid
 flowchart TD
@@ -84,7 +84,7 @@ flowchart TD
     C --> D["Asignar palabra no usada y marcarla 'Usada'"]
     D --> E["Jugar: adivinar letra"]
     E -->|Acierta| F["Revelar posiciones"]
-    E -->|Falla| G["Restar intento y registrar fallo"]
+    E -->|Falla|  G["Restar intento y registrar fallo"]
 
     F --> H{"¿Palabra completa?"}
     G --> I{"¿Quedan intentos?"}
@@ -97,6 +97,9 @@ flowchart TD
     J --> L["Escalafón"]
     K --> L
     L --> M["Fin"]
+    ```
+
+
 
 
 
