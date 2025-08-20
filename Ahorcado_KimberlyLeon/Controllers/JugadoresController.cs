@@ -54,9 +54,9 @@ namespace Ahorcado_KimberlyLeon.Controllers
         }
 
         // GET: Jugadores/Escalafon
+        // GET: Jugadores/Escalafon
         public async Task<ActionResult> Escalafon()
         {
-            // Calculamos "Marcador" en la consulta (EF6 lo soporta)
             var lista = await db.Jugadores
                 .Select(j => new JugadorEscalafonVM
                 {
@@ -68,8 +68,10 @@ namespace Ahorcado_KimberlyLeon.Controllers
                     PerdidasFacil = j.PerdidasFacil,
                     PerdidasNormal = j.PerdidasNormal,
                     PerdidasDificil = j.PerdidasDificil,
-                    Marcador = (j.GanadasFacil + j.GanadasNormal + j.GanadasDificil)
-                             - (j.PerdidasFacil + j.PerdidasNormal + j.PerdidasDificil)
+
+                    // >>> Marcador con pesos 1/2/3
+                    Marcador = (j.GanadasFacil * 1 + j.GanadasNormal * 2 + j.GanadasDificil * 3)
+                             - (j.PerdidasFacil * 1 + j.PerdidasNormal * 2 + j.PerdidasDificil * 3)
                 })
                 .OrderByDescending(j => j.Marcador)
                 .ThenBy(j => j.Nombre)
@@ -77,6 +79,7 @@ namespace Ahorcado_KimberlyLeon.Controllers
 
             return View(lista);
         }
+
 
         protected override void Dispose(bool disposing)
         {
